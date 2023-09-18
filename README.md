@@ -1,3 +1,3 @@
 # C_exercices
  
-[Tic-Tac-Toe](tictactoe)
+[Tic-Tac-Toe](./tictactoe)
