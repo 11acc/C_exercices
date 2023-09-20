@@ -36,7 +36,8 @@ int main() {
 
     // main game loop
     do {
-        gameState = 1;
+        // reset values
+        inputVal=0, gameState=1, switchVal=0, again=-1;
         // start of the game
         gameMain(moveType, &fScore, &sScore, &gameState, &switchVal);
 
@@ -72,9 +73,10 @@ void gameMain(char moveType, int *fScore, int *sScore, int *gameState, int *swit
             gameActive = 0;
             break;
         }
-        // prompt first player to make a move + check
+        // prompt first player to make a move
         makeAMove(moveType, boardVals);
-        makeBoard(boardVals);
+        // makeBoard(boardVals); //for debugging
+
         // Point to current player score
         if (*switchVal % 2 == 0) {
             // normally this would be &fScore, but since its a func pointer...
@@ -187,6 +189,8 @@ int checkWin(char *b, char moveType, int *aScore) {
             }
         }
     }
+    // printf("hor failed\n");
+
     // vertical
     for (int v = 0; v < 3; v++) {
         if (b[v] == moveType) {
@@ -199,30 +203,31 @@ int checkWin(char *b, char moveType, int *aScore) {
             }
         }
     }
+    // printf("vert failed\n");
+    
     // diagonal
     // top left
-    for (int d = 0; d < 8; d+=4) {
-        if (b[d] == moveType) {
-            if (b[(d+4)] == moveType) {
-                if (b[(d+8)] == moveType) {
-                    printf("%c wins!\n", moveType);
-                    *aScore += 1;
-                    return 1;
-                }
+    if (b[0] == moveType) {
+        if (b[(4)] == moveType) {
+            if (b[(8)] == moveType) {
+                printf("%c wins!\n", moveType);
+                *aScore += 1;
+                return 1;
             }
         }
     }
+    // printf("top left diag failed\n");
+    
     // bottom left
-    for (int d = 2; d < 7; d+=2) {
-        if (b[d] == moveType) {
-            if (b[(d+2)] == moveType) {
-                if (b[(d+4)] == moveType) {
-                    printf("%c wins!\n", moveType);
-                    *aScore += 1;
-                    return 1;
-                }
+    if (b[2] == moveType) {
+        if (b[(4)] == moveType) {
+            if (b[6] == moveType) {
+                printf("%c wins!\n", moveType);
+                *aScore += 1;
+                return 1;
             }
         }
     }
+    // printf("bot left diag failed\n");
     return 0;
 }
