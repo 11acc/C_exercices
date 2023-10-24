@@ -1,0 +1,14 @@
+[
+{
+  "directory": "C:/Users/aleja/Documents/Local Code/cp II/git/ttt/build",
+  "command": "C:\\msys64\\mingw64\\bin\\gcc.exe -I\"C:/Users/aleja/Documents/Local Code/cp II/git/ttt/\"C:/CUnit-2.1-2/CUnit/Headers/\"\" -I\"C:/Users/aleja/Documents/Local Code/cp II/git/ttt/.\" -g -std=gnu11 -o CMakeFiles\\ttt.dir\\tictactoe.c.obj -c \"C:\\Users\\aleja\\Documents\\Local Code\\cp II\\git\\ttt\\tictactoe.c\"",
+  "file": "C:\\Users\\aleja\\Documents\\Local Code\\cp II\\git\\ttt\\tictactoe.c",
+  "output": "CMakeFiles\\ttt.dir\\tictactoe.c.obj"
+},
+{
+  "directory": "C:/Users/aleja/Documents/Local Code/cp II/git/ttt/build",
+  "command": "C:\\msys64\\mingw64\\bin\\gcc.exe -I\"C:/Users/aleja/Documents/Local Code/cp II/git/ttt/\"C:/CUnit-2.1-2/CUnit/Headers/\"\" -I\"C:/Users/aleja/Documents/Local Code/cp II/git/ttt/.\" -g -std=gnu11 -o CMakeFiles\\ttt.dir\\ttt_test.c.obj -c \"C:\\Users\\aleja\\Documents\\Local Code\\cp II\\git\\ttt\\ttt_test.c\"",
+  "file": "C:\\Users\\aleja\\Documents\\Local Code\\cp II\\git\\ttt\\ttt_test.c",
+  "output": "CMakeFiles\\ttt.dir\\ttt_test.c.obj"
+}
+]

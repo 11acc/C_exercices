@@ -1,0 +1,237 @@
+        -:    0:Source:ttt_without_main.c
+        -:    0:Graph:ttt_test-ttt_without_main.gcno
+        -:    0:Data:ttt_test-ttt_without_main.gcda
+        -:    0:Runs:1
+        -:    1:
+        -:    2://
+        -:    3:// file for cunit testing purposes
+        -:    4:// 11acc / alejandro gutierrez acosta
+        -:    5:
+        -:    6:#include <stdio.h>
+        -:    7:#include <stdlib.h>
+        -:    8:#include <string.h>
+        -:    9:
+        -:   10:// struct to hold the game state and score
+        -:   11:typedef struct {
+        -:   12:    char board[9];
+        -:   13:    int p1Score;
+        -:   14:    int p2Score;
+        -:   15:    int currPlayer;
+        -:   16:} GameState;
+        -:   17:
+        -:   18:// main game functions
+        -:   19:void displayGrid(char b[]);
+        -:   20:int checkWin(char b[], char p);
+        -:   21:void isValidMove(int *move, char b[]);
+        -:   22:void isDraw(int *gC, char b[]);
+        -:   23:
+        -:   24:char checkPlayerOrder(int counter);
+        -:   25:
+        -:   26:// other utility functions
+        -:   27:GameState initialiseGame();
+        -:   28:void updateNSave(GameState* gameState, int xScore, int oScore, int counter, int win, char b[]);
+        -:   29:int loadGame(GameState* gameState);
+        -:   30:void clearInputBuffer();
+        -:   31:
+        -:   32:/* ----------- xxx ----------- */
+        -:   33:
+    #####:   34:GameState initialiseGame() {
+        -:   35:    // load previous game state if it exists
+        -:   36:    // printf("loading game...\n");
+        -:   37:    GameState gameState;
+    #####:   38:    int stateGame = loadGame(&gameState);
+        -:   39:
+    #####:   40:    if (stateGame) {
+        -:   41:        // sucess return loaded game
+    #####:   42:        return gameState;
+        -:   43:    }
+        -:   44:
+        -:   45:    // if file does not exist, is empty, or failed to load then initialize a new game
+        -:   46:    // printf("initializing new game\n");
+    #####:   47:    GameState newGameState = {
+        -:   48:        .board = "         ",
+        -:   49:        .p1Score = 0,
+        -:   50:        .p2Score = 0,
+        -:   51:        .currPlayer = 0
+        -:   52:    };
+    #####:   53:    return newGameState;
+        -:   54:}
+        -:   55:
+    #####:   56:void updateNSave(GameState* gameState, int xScore, int oScore, int counter, int win, char b[]) {
+        -:   57:    // update gameState before saving
+    #####:   58:    gameState->p1Score = xScore;
+    #####:   59:    gameState->p2Score = oScore;
+    #####:   60:    gameState->currPlayer = counter;
+        -:   61:    // to avoid text problems save empty spaces as 'e'
+    #####:   62:    for(int i = 0; i < 9; i++) {
+    #####:   63:        gameState->board[i] = b[i] == ' ' ? 'e' : b[i];
+        -:   64:    }
+        -:   65:
+        -:   66:    // writing...
+    #####:   67:    FILE *file = fopen("ttt_save_data.txt", "w");
+    #####:   68:    if (file == NULL) {
+    #####:   69:        fprintf(stderr, "error opening file for writing\n");
+    #####:   70:        return;
+        -:   71:    }
+        -:   72:    // write the score and current player
+    #####:   73:    fprintf(file, "%d %d %d\n", gameState->p1Score, gameState->p2Score, gameState->currPlayer);
+        -:   74:
+        -:   75:    // if game finished, don't save the board
+    #####:   76:    if (win) {
+        -:   77:        // printf("saving game as empty because of win\n");
+    #####:   78:        strcpy(gameState->board, "         ");  // set elems to spaces for an empty board
+    #####:   79:        fprintf(file, "11acc_dont_read_board");
+        -:   80:    } else {
+    #####:   81:        for (int i = 0; i < 9; i++) {
+    #####:   82:            fprintf(file, "%c ", gameState->board[i]);
+        -:   83:        }
+        -:   84:    }
+        -:   85:
+    #####:   86:    fclose(file);
+        -:   87:}
+        -:   88:
+        3:   89:int loadGame(GameState* gameState) {
+        -:   90:    // 0 for empty/fail, 1 for sucess
+        3:   91:    FILE *file = fopen("ttt_save_data.txt", "r");
+        -:   92:
+        3:   93:    if (file != NULL) {
+        -:   94:        // check if the file is empty
+        3:   95:        fseek(file, 0, SEEK_END);
+        3:   96:        long fileSize = ftell(file);
+        3:   97:        rewind(file); // rewind to top of file
+        -:   98:
+        3:   99:        if (fileSize == 0) {
+        -:  100:            // printf("save file empty\n");
+    #####:  101:            fclose(file);
+    #####:  102:            return 0;
+        -:  103:        } else {
+        -:  104:            // we have smth, lets load it
+        -:  105:            // read the score and current player
+        3:  106:            fscanf(file, "%d %d %d\n", &gameState->p1Score, &gameState->p2Score, &gameState->currPlayer);
+        -:  107:
+        -:  108:            // read the board state
+        -:  109:            // first check if board should be empty
+        -:  110:            char checkEmpty[22];
+        3:  111:            fscanf(file, "%21s", checkEmpty);
+        -:  112:
+        3:  113:            if (strcmp(checkEmpty, "11acc_dont_read_board") == 0) {
+        -:  114:                // board should be empty
+    #####:  115:                printf("loading board as empty\n");
+    #####:  116:                strcpy(gameState->board, "         ");
+        -:  117:            } else {
+        3:  118:                fseek(file, -strlen(checkEmpty), SEEK_CUR); // go back to start reading the board
+       30:  119:                for (int i = 0; i < 9; i++) {
+        -:  120:                    char c;
+       27:  121:                    fscanf(file, "%c", &c);
+      27*:  122:                    gameState->board[i] = c == 'e' ? ' ' : c;  // replace 'e' with space
+        -:  123:                }
+        3:  124:                gameState->board[9] = '\0'; // Null-terminate the string
+        -:  125:            }
+        -:  126:
+        -:  127:            // printf("loaded successfully\n");
+        3:  128:            fclose(file);
+        3:  129:            return 1;
+        -:  130:        }
+        -:  131:    } else {
+        -:  132:        // printf("error opening the save file\n");
+    #####:  133:        return 0;
+        -:  134:    }
+        -:  135:}
+        -:  136:
+        -:  137:/* ----------- xxx ----------- */
+        -:  138:
+    #####:  139:char checkPlayerOrder(int c) {
+    #####:  140:    char player = ' ';
+    #####:  141:    if (c % 2 == 0) {
+    #####:  142:        player = 'X';
+        -:  143:    } else {
+    #####:  144:        player = 'O';
+        -:  145:    }
+    #####:  146:    return player;
+        -:  147:}
+        -:  148:
+    #####:  149:void displayGrid(char b[]) {
+    #####:  150:    printf("\n");
+    #####:  151:    printf(" %c | %c | %c\n", b[0], b[1], b[2]);
+    #####:  152:    printf("---|---|---\n");
+    #####:  153:    printf(" %c | %c | %c\n", b[3], b[4], b[5]);
+    #####:  154:    printf("---|---|---\n");
+    #####:  155:    printf(" %c | %c | %c\n", b[6], b[7], b[8]);
+    #####:  156:    printf("\n");
+    #####:  157:}
+        -:  158:
+    #####:  159:void isDraw(int *gC, char b[]) {
+    #####:  160:    if (strchr(b, ' ') == NULL) {
+    #####:  161:        *gC = 0; // false, game stops
+        -:  162:    }
+    #####:  163:}
+        -:  164:
+    #####:  165:void isValidMove(int *move, char b[]) {
+        -:  166:    int inputVal
+    #####:  167:        , notValid=1;
+        -:  168:    do {
+        -:  169:        // check if input is a number and 0-8 inclusive
+    #####:  170:        if (scanf("%d", &inputVal) != 1 || (inputVal < 0 || inputVal > 8)) {
+        -:  171:            // printf("Please input valid number\n");
+    #####:  172:            clearInputBuffer();
+        -:  173:        // check if move is on tile already occupied
+    #####:  174:        } else if (b[inputVal] != ' ') {
+        -:  175:            // printf("Position already taken\n");
+    #####:  176:            clearInputBuffer();
+        -:  177:        } else {
+    #####:  178:            notValid = 0;
+        -:  179:        }
+    #####:  180:    } while (notValid);
+    #####:  181:    *move = inputVal;
+    #####:  182:}
+    #####:  183:void clearInputBuffer() {
+        -:  184:    int c;
+    #####:  185:    while ((c = getchar()) != '\n' && c != EOF) {
+        -:  186:    }
+    #####:  187:}
+        -:  188:
+        5:  189:int checkWin(char b[], char p) {
+        -:  190:    // horizontal
+       17:  191:    for (int h = 0; h < 9; h+=3) {
+       13:  192:        if (b[h] == p) {
+        6:  193:            if (b[h+1] == p) {
+        1:  194:                if (b[h+2] == p) {
+        -:  195:                    // printf("Player %c wins!\n", p);
+        1:  196:                    return 1;
+        -:  197:                }
+        -:  198:            }
+        -:  199:        }
+        -:  200:    }
+        -:  201:    // vertical
+       13:  202:    for (int v = 0; v < 3; v++) {
+       10:  203:        if (b[v] == p) {
+        2:  204:            if (b[(v+3)] == p) {
+        1:  205:                if (b[(v+6)] == p) {
+        -:  206:                    // printf("Player %c wins!\n", p);
+        1:  207:                    return 1;
+        -:  208:                }
+        -:  209:            }
+        -:  210:        }
+        -:  211:    }
+        -:  212:    // diagonal
+        -:  213:    // top left
+        3:  214:    if (b[0] == p) {
+        1:  215:        if (b[(4)] == p) {
+        1:  216:            if (b[(8)] == p) {
+        -:  217:                // printf("Player %c wins!\n", p);
+        1:  218:                return 1;
+        -:  219:            }
+        -:  220:        }
+        -:  221:    }
+        -:  222:    // bottom left
+        2:  223:    if (b[2] == p) {
+    #####:  224:        if (b[(4)] == p) {
+    #####:  225:            if (b[6] == p) {
+        -:  226:                // printf("Player %c wins!\n", p);
+    #####:  227:                return 1;
+        -:  228:            }
+        -:  229:        }
+        -:  230:    }
+        -:  231:
+        2:  232:    return 0;
+        -:  233:}
