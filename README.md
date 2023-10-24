@@ -4,8 +4,6 @@
 
 Tic Tac Toe game implemented in C through the command line. Includes CUnit test cases for the game functions, including coverage test.
 
-![](header.png)
-
 ## How To Use
 
 To clone and run this program, you'll need [Git](https://git-scm.com) and [CUnit](https://sourceforge.net/projects/cunit/files/CUnit/) installed on your computer. From your command line:
