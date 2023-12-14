@@ -10,7 +10,7 @@ To clone and run this program, you'll need [Git](https://git-scm.com) and [CUnit
 
 ```bash
 # Clone this repository
-$ git clone https://github.com/11acc/tictactoe
+$ git clone https://github.com/11acc/tictactoe.git
 
 # To run game
 $ gcc tictactoe.c -o ttt
